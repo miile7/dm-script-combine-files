@@ -8,52 +8,68 @@ contains all the files that are required by this file.
 """
 
 def printOverview():
-    global main_path, base_path, save_path, require_function, include_main_content
+    global main_path, base_path, save_path, require_function, include_main_content, comment, version, current_dir
 
     writeHead()
     print("")
-    print("<1> main file is:          {}".format(main_path))
-    print("<2> save file is:          {}".format(save_path))
-    print("<3> require relative to:   {}".format(base_path))
+    print(current_dir)
+    print("")
+    print("<1> main file is:          {}".format(os.path.relpath(main_path, current_dir)))
+    print("<2> save file is:          {}".format(os.path.relpath(save_path, current_dir)))
+    print("<3> require relative to:   {}".format(os.path.relpath(base_path, current_dir)))
     print("<4> require-function name: {}".format(require_function))
     print("<5> include main content:  {}".format("yes" if include_main_content else "no"))
+    print("<6> comment:               {}".format(comment))
+    print("<7> combined file version: {}".format(version))
     print("")
     action = input("Type the number to change the value, press [Enter] to start, type [x] to exit: ")
     action = action.strip().lower()
 
-    if action == 1:
+    if action == "1":
         readMainPath()
-    elif action == 2:
+    elif action == "2":
         readSavePath()
-    elif action == 3:
+    elif action == "3":
         readBasePath()
-    elif action == 4:
+    elif action == "4":
         readRequireFunctionName()
-    elif action == 5:
+    elif action == "5":
         readIncludeMainContent()
+    elif action == "6":
+        readComment()
+    elif action == "7":
+        readVersion()
     elif action == "x":
         exit(0)
     else:
         return
+    
+    printOverview()
 
 def readBasePath():
-    global base_path
+    global base_path, current_dir
     writeHead()
     print("Type in the path that the main file is requiring relative to.")
-    base_path = input("Base path of requiring: ")
+    print("")
+    print(current_dir)
+    base_path = os.path.abspath(input("Base path of requiring: "))
 
 def readSavePath():
-    global save_path
+    global save_path, current_dir
     writeHead()
     print("Type in the path (including the file name) of the file to generate " + 
           "and fill with the contents loaded from the main.")
-    save_path = input("Path of save file: ")
+    print("")
+    print(current_dir)
+    save_path = os.path.abspath(input("Path of save file: "))
 
 def readMainPath():
-    global main_path
+    global main_path, current_dir
     writeHead()
     print("Type in the path of the main.s which contains the 'require()' functions.")
-    main_path = input("Path of main.s: ")
+    print("")
+    print(current_dir)
+    main_path = os.path.abspath(input("Path of main.s: "))
 
 def readRequireFunctionName():
     global require_function
@@ -74,6 +90,20 @@ def readIncludeMainContent():
     else: 
         include_main_content = False
 
+def readComment():
+    global comment
+    writeHead()
+    print("A comment that will be added to the head of the combined file. To print no comment " + 
+          "set the comment to an empty string (the version has to be empty too).")
+    comment = input("Comment: ")
+
+def readVersion():
+    global version
+    writeHead()
+    print("The version to print in the comment section of the combined file. To print no version "
+          "set the version to an empty string.")
+    version = input("Version: ")
+
 def writeHead():
     os.system('cls' if os.name in ('nt', 'dos') else 'writeHead')
 
@@ -83,6 +113,7 @@ def writeHead():
     print("")
     print("")
 
+current_dir = os.path.abspath(".")
 writeHead()
 
 main_path = ""
@@ -92,6 +123,8 @@ base_path = pathlib.Path(__file__).parent.absolute()
 save_path = os.path.join(pathlib.Path(main_path).parent.absolute(), "combined.s")
 require_function = "require"
 include_main_content = False
+comment = ""
+version = ""
 
 printOverview()
 
@@ -99,6 +132,18 @@ writeHead()
 
 reg = re.compile(require_function + r"\(\s*(\"|')([^\1]+)\1\s*\)")
 combined_content = ""
+
+if version != "":
+    if comment != "":
+        comment += "\n\n"
+
+    comment += "@version " + version
+
+if comment != "":
+    combined_content = ("/**\n" + 
+                        " * " + comment.strip().replace("\n", "\n * ") + "\n" + 
+                        " */" + 
+                        "\n\n")
 
 try:
     main_content = ""
@@ -120,7 +165,10 @@ try:
 
                 try:
                     f = open(abs_path, "r")
-                    combined_content += "\n\n/* = = = file {} = = = */\n\n".format(rel_path)
+                    if combined_content == "":
+                        combined_content += "\n\n"
+                    
+                    combined_content += "/* = = = file {} = = = */\n".format(rel_path)
                     combined_content += f.read()
                     print("  Adding contents of {}.".format(rel_path))
                 except Exception as e:
