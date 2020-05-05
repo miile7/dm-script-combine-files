@@ -2,9 +2,13 @@
 
 A program to combine dm-script files that are glued with the `require()` function. This is an addition for the answer at https://stackoverflow.com/a/61345716/5934316.
 
+Simply download and execute the `combine.py`. It asks for the paths and will then create the combined file.
+
+Note: This requires a [python installation](https://www.python.org/downloads/).
+
 ## The requiring workaround
 
-The scripting language `dm-script` from Gatan does not have a proper way of including files. This is why I created the `require()` function together with the `main.s`. This `main.s` file is open in GMS 3 and it is barely changed. It will be executed for testing. The real program code is in `program.s` and can be edited by any other IDE. Also the libaries can be edited on runtime. This offers to split the code in modules.
+The scripting language [`dm-script` from Gatan](https://www.gatan.com/products/tem-analysis/gatan-microscopy-suite-software) does not have a proper way of including files. This is why I created the `require()` function together with the `main.s`. This `main.s` file is open in GMS 3 and it is barely changed. It will be executed for testing. The real program code is in `program.s` and can be edited by any other IDE. Also the libaries can be edited on runtime. This offers to split the code in modules.
 
 Note that this requires deleting the plugin directory before or after every start of GMS. This can be done manually by using the batch script below
 
