@@ -46,13 +46,31 @@ def printOverview():
     
     printOverview()
 
-def readBasePath():
+def checkPath(check_path, is_dir = True):
+    global current_dir
+
+    check_path = os.path.abspath(check_path)
+
+    if is_dir:
+        return os.path.exists(check_path) and os.path.isdir(check_path)
+    else:
+        return os.path.exists(check_path) and os.path.isfile(check_path)
+
+def readBasePath(msg = ""):
     global base_path, current_dir
     writeHead()
     print("Type in the path that the main file is requiring relative to.")
     print("")
+    if msg != "":
+        print(msg)
+    
     print(current_dir)
-    base_path = os.path.abspath(input("Base path of requiring: "))
+    base_path = input("Base path of requiring: ")
+
+    if not checkPath(base_path):
+        readBasePath("The directory '{}' does not exist.\n".format(base_path))
+    else:
+        base_path = os.path.abspath(base_path)
 
 def readSavePath():
     global save_path, current_dir
@@ -63,13 +81,21 @@ def readSavePath():
     print(current_dir)
     save_path = os.path.abspath(input("Path of save file: "))
 
-def readMainPath():
+def readMainPath(msg = ""):
     global main_path, current_dir
     writeHead()
     print("Type in the path of the main.s which contains the 'require()' functions.")
     print("")
+    if msg != "":
+        print(msg)
+
     print(current_dir)
-    main_path = os.path.abspath(input("Path of main.s: "))
+    main_path = input("Path of main.s: ")
+
+    if not checkPath(main_path, False):
+        readMainPath("The file '{}' does not exist.\n".format(main_path))
+    else:
+        main_path = os.path.abspath(main_path)
 
 def readRequireFunctionName():
     global require_function
